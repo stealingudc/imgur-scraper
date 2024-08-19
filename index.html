@@ -1,0 +1,72 @@
+<head>
+  <title>Imgur Image Scraper</title>
+  <style>
+    .minimized {
+      max-width: 300px;
+      cursor: zoom-in;
+    }
+
+    .maximized {
+      cursor: zoom-out;
+    }
+  </style>
+  <script>
+    function scrape() {
+      const data = [];
+
+      const scrapeImage = (num) => {
+        const chars = "01234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+        const length = 5;
+
+        var slug = "";
+
+        for (var i = 0; i < length; i++) {
+          const rand = Math.floor(Math.random() * chars.length);
+          slug += chars.substring(rand, rand + 1);
+        }
+
+        var src = "https://i.imgur.com/" + slug + ".jpg";
+
+        const img = new Image();
+        img.src = src;
+        img.onload = function () {
+          if (this.width == 161) {
+            console.log("Found dead link: " + slug);
+            scrapeImage(num);
+          } else {
+            console.log("Found working link: " + slug);
+            document.getElementById("image-container").appendChild((() => {
+              const p = document.createElement("p");
+              p.innerText = "#" + num + ": " + slug;
+              return p;
+            })());
+            document.getElementById("image-container").appendChild((() => {
+              const img = document.createElement("img");
+              img.src = this.src;
+              img.classList.add("minimized");
+              img.onclick = function (e) {
+                e.target.classList.toggle("minimized");
+                e.target.classList.toggle("maximized");
+              }
+              return img;
+            })());
+          }
+        };
+      }
+
+      for (var i = 0; i < document.getElementById("amount").value; i++) {
+        scrapeImage(i+1);
+      }
+    }
+  </script>
+</head>
+
+<body>
+  <h1>Imgur Image Scraper</h1>
+  <p>Enter the number of images you wish to scrape:</p>
+  <input id="amount" type="number">
+  <button onclick="scrape()">Scrape</button>
+  <div id="image-container"></div>
+  <br>
+  <a href="">Refresh Page</a>
+</body>
